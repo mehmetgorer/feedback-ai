@@ -4,7 +4,11 @@ namespace CustomerFeedback.Api.Services;
 
 public interface IFeedbackService
 {
-    Task<IReadOnlyList<FeedbackResponse>> ListAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<FeedbackResponse>> ListAsync(
+        int page,
+        int pageSize,
+        int? rating = null,
+        CancellationToken cancellationToken = default);
     Task<FeedbackResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<FeedbackResponse> CreateAsync(CreateFeedbackRequest request, CancellationToken cancellationToken = default);
     Task<FeedbackResponse?> UpdateAsync(Guid id, UpdateFeedbackRequest request, CancellationToken cancellationToken = default);
