@@ -49,6 +49,44 @@ dotnet test
 
 Unit tests cover validators. Integration tests use `WebApplicationFactory` with an isolated SQLite database.
 
+## Docker
+
+The API image uses multi-stage builds on official `mcr.microsoft.com/dotnet` **.NET 10** images, listens on **8080**, and runs the process as the non-root **app** user (via `docker-entrypoint.sh`).
+
+SQLite data is stored on a named volume at `/data/feedback.db`.
+
+### Database migrations in containers
+
+| Approach | When to use |
+|----------|-------------|
+| **Startup migrate (default in Compose)** | Set `Database__MigrateOnStartup=true`. On boot, EF Core runs pending migrations before serving requests (same as Development auto-migrate). Suitable for single-instance demos and local Docker. |
+| **Manual / CI migrate** | Build migrations into the image and run `dotnet ef database update` from a SDK container or release pipeline before or during deploy; set `Database__MigrateOnStartup=false` for multi-instance production. |
+
+### Build
+
+```bash
+docker build -t customer-feedback-api .
+```
+
+### Run (localhost-only port binding)
+
+```bash
+docker run --rm \
+  -p 127.0.0.1:8080:8080 \
+  -e Database__MigrateOnStartup=true \
+  -e ConnectionStrings__DefaultConnection="Data Source=/data/feedback.db" \
+  -v customer-feedback-data:/data \
+  customer-feedback-api
+```
+
+### Compose
+
+```bash
+docker compose up --build
+```
+
+API: `http://127.0.0.1:8080`
+
 ## Solution structure
 
 - `CustomerFeedback.Api` — HTTP API, EF Core, validation, error handling

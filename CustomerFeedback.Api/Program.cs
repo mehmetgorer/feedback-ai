@@ -27,7 +27,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
 
+var migrateOnStartup = app.Configuration.GetValue<bool>("Database:MigrateOnStartup");
+if (app.Environment.IsDevelopment() || migrateOnStartup)
+{
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
