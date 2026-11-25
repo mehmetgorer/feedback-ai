@@ -10,15 +10,23 @@ public class FeedbackController(IFeedbackService feedbackService, ILogger<Feedba
 {
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<FeedbackResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IReadOnlyList<FeedbackResponse>>> List(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] int? rating = null,
         CancellationToken cancellationToken = default)
     {
+        if (rating is < 1 or > 5)
+        {
+            ModelState.AddModelError(nameof(rating), "Rating must be between 1 and 5.");
+            return ValidationProblem(modelStateDictionary: ModelState, statusCode: StatusCodes.Status400BadRequest);
+        }
+
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var items = await feedbackService.ListAsync(page, pageSize, cancellationToken);
+        var items = await feedbackService.ListAsync(page, pageSize, rating, cancellationToken);
         return Ok(items);
     }
 

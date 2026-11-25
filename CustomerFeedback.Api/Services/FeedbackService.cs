@@ -11,10 +11,17 @@ public class FeedbackService(AppDbContext dbContext) : IFeedbackService
     public async Task<IReadOnlyList<FeedbackResponse>> ListAsync(
         int page,
         int pageSize,
+        int? rating = null,
         CancellationToken cancellationToken = default)
     {
-        var items = await dbContext.Feedbacks
-            .AsNoTracking()
+        var query = dbContext.Feedbacks.AsNoTracking();
+
+        if (rating is not null)
+        {
+            query = query.Where(f => f.Rating == rating.Value);
+        }
+
+        var items = await query
             .OrderByDescending(f => f.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

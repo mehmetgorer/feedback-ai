@@ -15,11 +15,11 @@ public class FeedbackApiTests : IClassFixture<FeedbackApiFactory>
         _client = factory.CreateClient();
     }
 
-    private static CreateFeedbackRequest SampleRequest(string suffix = "") => new()
+    private static CreateFeedbackRequest SampleRequest(string suffix = "", int rating = 4) => new()
     {
         CustomerName = $"Customer {suffix}",
         CustomerEmail = $"customer{suffix}@example.com",
-        Rating = 4,
+        Rating = rating,
         Comment = $"Feedback comment {suffix} is detailed enough."
     };
 
@@ -139,5 +139,47 @@ public class FeedbackApiTests : IClassFixture<FeedbackApiFactory>
         var items = await response.Content.ReadFromJsonAsync<List<FeedbackResponse>>();
         Assert.NotNull(items);
         Assert.Equal(2, items.Count);
+    }
+
+    [Fact]
+    public async Task List_WithRatingFilter_ReturnsOnlyMatchingRatings()
+    {
+        await _client.PostAsJsonAsync("/api/feedback", SampleRequest("rating-a", rating: 2));
+        await _client.PostAsJsonAsync("/api/feedback", SampleRequest("rating-b", rating: 5));
+        await _client.PostAsJsonAsync("/api/feedback", SampleRequest("rating-c", rating: 2));
+
+        var response = await _client.GetAsync("/api/feedback?rating=2&page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var items = await response.Content.ReadFromJsonAsync<List<FeedbackResponse>>();
+        Assert.NotNull(items);
+        Assert.True(items.Count >= 2);
+        Assert.All(items, item => Assert.Equal(2, item.Rating));
+    }
+
+    [Fact]
+    public async Task List_WithRatingFilterAndPagination_ReturnsRequestedPageSize()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            await _client.PostAsJsonAsync("/api/feedback", SampleRequest($"filter-page-{i}", rating: 3));
+        }
+
+        var response = await _client.GetAsync("/api/feedback?rating=3&page=1&pageSize=2");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var items = await response.Content.ReadFromJsonAsync<List<FeedbackResponse>>();
+        Assert.NotNull(items);
+        Assert.Equal(2, items.Count);
+        Assert.All(items, item => Assert.Equal(3, item.Rating));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(6)]
+    public async Task List_InvalidRating_ReturnsBadRequest(int rating)
+    {
+        var response = await _client.GetAsync($"/api/feedback?rating={rating}");
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }
