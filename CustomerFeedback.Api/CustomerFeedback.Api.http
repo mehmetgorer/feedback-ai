@@ -1,4 +1,4 @@
-@CustomerFeedback.Api_HostAddress = http://localhost:5092
+@CustomerFeedback.Api_HostAddress = http://localhost:5047
 
 GET {{CustomerFeedback.Api_HostAddress}}/api/feedback?page=1&pageSize=20
 Accept: application/json
@@ -12,7 +12,12 @@ Content-Type: application/json
   "customerName": "Jane Doe",
   "customerEmail": "jane@example.com",
   "rating": 5,
-  "comment": "Excellent support experience."
+  "comment": "Excellent support experience and fast delivery."
 }
+
+###
+
+POST {{CustomerFeedback.Api_HostAddress}}/api/feedback/{{feedbackId}}/analyze
+Accept: application/json
 
 ###

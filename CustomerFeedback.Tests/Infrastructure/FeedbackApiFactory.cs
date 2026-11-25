@@ -1,14 +1,18 @@
+using CustomerFeedback.Api.Analysis;
 using CustomerFeedback.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CustomerFeedback.Tests.Infrastructure;
 
 public sealed class FeedbackApiFactory : WebApplicationFactory<Program>
 {
+    public FakeFeedbackAnalysisService AnalysisService { get; } = new();
+
     private SqliteConnection? _connection;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -33,6 +37,9 @@ public sealed class FeedbackApiFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(_connection));
+
+            services.RemoveAll<IFeedbackAnalysisService>();
+            services.AddSingleton<IFeedbackAnalysisService>(AnalysisService);
         });
     }
 
