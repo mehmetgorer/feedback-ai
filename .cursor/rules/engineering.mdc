@@ -1,0 +1,27 @@
+---
+description: Core engineering standards for all work in this repository
+alwaysApply: true
+---
+
+# Engineering standards
+
+Apply these practices on every task in this repository.
+
+## Before you change code
+
+- Inspect existing code and patterns before modifying anything. Match naming, structure, and conventions already in the project.
+- Keep scope tight: avoid unrelated refactors, drive-by formatting, or changes outside what the task requires.
+
+## Security
+
+- Never expose secrets. Do not commit, log, or paste credentials, API keys, connection strings with passwords, or `.env` contents. Use configuration and environment variables as the project already does.
+- Do not introduce vulnerable dependencies. Prefer current, supported package versions; run `dotnet list package --vulnerable` when adding or upgrading NuGet packages and address or document known advisories.
+
+## Quality and verification
+
+- Add or update automated tests when behavior changes (new features, bug fixes, validation rules, API contracts).
+- After implementation, run build and tests (for example `dotnet build` and `dotnet test`) and fix failures before considering the work done.
+
+## Handoff
+
+- Report what changed (files and intent) and any unresolved issues, risks, or follow-ups the user should know about.

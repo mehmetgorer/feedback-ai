@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  SolutionPath: CustomerFeedback.slnx
+  BuildConfiguration: Release
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore "${{ env.SolutionPath }}"
+
+      - name: Build
+        run: dotnet build "${{ env.SolutionPath }}" --no-restore --configuration "${{ env.BuildConfiguration }}"
+
+      - name: Test
+        run: dotnet test "${{ env.SolutionPath }}" --no-build --configuration "${{ env.BuildConfiguration }}" --verbosity normal
+
+      - name: Audit vulnerable dependencies
+        run: |
+          set -euo pipefail
+          audit_output="$(dotnet list "${{ env.SolutionPath }}" package --vulnerable --include-transitive 2>&1)" || true
+          echo "$audit_output"
+          if echo "$audit_output" | grep -qiE 'has the following vulnerable|vulnerability|GHSA-'; then
+            echo "::error::Vulnerable NuGet packages were detected. Run 'dotnet list package --vulnerable --include-transitive' locally and upgrade or document advisories."
+            exit 1
+          fi
