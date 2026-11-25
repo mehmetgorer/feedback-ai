@@ -13,4 +13,5 @@ public interface IFeedbackService
     Task<FeedbackResponse> CreateAsync(CreateFeedbackRequest request, CancellationToken cancellationToken = default);
     Task<FeedbackResponse?> UpdateAsync(Guid id, UpdateFeedbackRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<FeedbackResponse?> AnalyzeAsync(Guid id, CancellationToken cancellationToken = default);
 }

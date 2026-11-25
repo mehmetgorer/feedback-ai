@@ -31,6 +31,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.CreatedAtUtc)
                 .IsRequired();
 
+            entity.Property(e => e.AnalysisSentiment)
+                .HasMaxLength(20);
+
+            entity.Property(e => e.AnalysisCategory)
+                .HasMaxLength(30);
+
+            entity.Property(e => e.AnalysisSummary)
+                .HasMaxLength(500);
+
             entity.HasIndex(e => e.CreatedAtUtc);
         });
     }

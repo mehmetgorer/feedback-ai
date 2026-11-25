@@ -1,3 +1,4 @@
+using CustomerFeedback.Api.Analysis;
 using CustomerFeedback.Api.Data;
 using CustomerFeedback.Api.Dtos;
 using CustomerFeedback.Api.Mapping;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CustomerFeedback.Api.Services;
 
-public class FeedbackService(AppDbContext dbContext) : IFeedbackService
+public class FeedbackService(AppDbContext dbContext, IFeedbackAnalysisService analysisService) : IFeedbackService
 {
     public async Task<IReadOnlyList<FeedbackResponse>> ListAsync(
         int page,
@@ -70,6 +71,11 @@ public class FeedbackService(AppDbContext dbContext) : IFeedbackService
             return null;
         }
 
+        if (!string.Equals(entity.Comment, request.Comment, StringComparison.Ordinal))
+        {
+            FeedbackMapper.ClearAnalysis(entity);
+        }
+
         entity.CustomerName = request.CustomerName;
         entity.CustomerEmail = request.CustomerEmail;
         entity.Rating = request.Rating;
@@ -93,5 +99,25 @@ public class FeedbackService(AppDbContext dbContext) : IFeedbackService
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    public async Task<FeedbackResponse?> AnalyzeAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = await dbContext.Feedbacks.FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
+        if (entity is null)
+        {
+            return null;
+        }
+
+        var result = await analysisService.AnalyzeCommentAsync(entity.Comment, cancellationToken);
+
+        entity.AnalysisSentiment = result.Sentiment;
+        entity.AnalysisCategory = result.Category;
+        entity.AnalysisSummary = result.Summary;
+        entity.AnalyzedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return FeedbackMapper.ToResponse(entity);
     }
 }

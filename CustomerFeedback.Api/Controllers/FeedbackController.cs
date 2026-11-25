@@ -1,3 +1,4 @@
+using CustomerFeedback.Api.Analysis;
 using CustomerFeedback.Api.Dtos;
 using CustomerFeedback.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -89,5 +90,36 @@ public class FeedbackController(IFeedbackService feedbackService, ILogger<Feedba
 
         logger.LogInformation("Deleted feedback {FeedbackId}", id);
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/analyze")]
+    [ProducesResponseType(typeof(FeedbackResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status504GatewayTimeout)]
+    public async Task<ActionResult<FeedbackResponse>> Analyze(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await feedbackService.AnalyzeAsync(id, cancellationToken);
+            if (result is null)
+            {
+                return NotFound();
+            }
+
+            logger.LogInformation("Analyzed feedback {FeedbackId}", id);
+            return Ok(result);
+        }
+        catch (FeedbackAnalysisException ex)
+        {
+            logger.LogWarning(ex, "Feedback analysis failed for {FeedbackId}", id);
+            return Problem(
+                detail: ex.Message,
+                statusCode: ex.StatusCode,
+                title: "Feedback analysis failed");
+        }
     }
 }

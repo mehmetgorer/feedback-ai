@@ -5,6 +5,8 @@
 - `CustomerFeedback.slnx` contains the ASP.NET Core API and its test project. Both target .NET 10.
 - `CustomerFeedback.Api/` contains the feedback endpoints in `Controllers/`, application logic in `Services/`, request and response types in `Dtos/`, and FluentValidation rules in `Validation/`. EF Core uses SQLite, with the context in `Data/` and schema history in `Migrations/`.
 - `CustomerFeedback.Tests/` contains validator unit tests in `Validation/`, HTTP integration tests in `Integration/`, and the test host in `Infrastructure/`. Use `CustomerFeedback.Api/CustomerFeedback.Api.http` for manual requests.
+- `frontend/` is a Vite + React + TypeScript dashboard. API calls use `/api` and the Vite dev/preview proxy to `http://127.0.0.1:5047` by default (see `frontend/.env.example`).
+- `CustomerFeedback.Api/Analysis/` contains Groq-backed feedback analysis (`POST /api/feedback/{id}/analyze`). Configure `Groq:ApiKey` on the server only. Integration tests replace `IFeedbackAnalysisService` with `FakeFeedbackAnalysisService`.
 
 ## Build, Test, and Run
 
@@ -14,6 +16,7 @@ Run these commands from the repository root with the .NET 10 SDK installed.
 - `dotnet run --project CustomerFeedback.Api` starts the API. In Development, startup applies pending migrations and serves OpenAPI at `/openapi/v1.json`.
 - `dotnet test` runs all tests. Add `--filter FullyQualifiedName~FeedbackApiTests` to run the HTTP integration tests.
 - With the `dotnet-ef` tool installed, run `dotnet ef migrations add <Name> --project CustomerFeedback.Api --output-dir Migrations` after a schema change. Keep local SQLite database files out of commits.
+- `cd frontend && npm install && npm run dev` starts the dashboard (run the API first). `npm run build` produces static assets in `frontend/dist`.
 
 ## Coding Style
 
