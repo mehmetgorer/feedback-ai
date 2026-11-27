@@ -5,3 +5,19 @@ obj/
 *.db
 *.db-shm
 *.db-wal
+
+# Local environment and secrets (never commit)
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+**/secrets.json
+
+# Node (if installed at repo root)
+node_modules/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db

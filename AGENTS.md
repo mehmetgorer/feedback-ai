@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+**FeedbackAI** — customer feedback API and React dashboard with optional Groq-based comment analysis. Product branding is FeedbackAI; .NET project folders remain `CustomerFeedback.*` for stable paths.
+
 ## Project Structure
 
 - `CustomerFeedback.slnx` contains the ASP.NET Core API and its test project. Both target .NET 10.

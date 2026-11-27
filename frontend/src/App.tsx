@@ -156,8 +156,10 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div>
-          <h1>Customer Feedback</h1>
-          <p className="app-subtitle">Monitor ratings and manage submissions</p>
+          <h1>FeedbackAI</h1>
+          <p className="app-subtitle">
+            Customer feedback dashboard with AI-powered comment analysis
+          </p>
         </div>
         <button
           type="button"

@@ -1,22 +1,17 @@
-# Customer Feedback Dashboard
+# FeedbackAI Dashboard
 
-React + TypeScript + Vite UI for the Customer Feedback API.
+React + TypeScript + Vite UI for the FeedbackAI API (`CustomerFeedback.Api`).
 
-## Prerequisites
+## Run
 
-- Node.js 20+
-- API running at `http://localhost:5047` (see repository root `README.md`)
-
-## Development
+Prerequisites: Node.js 20+, API running at `http://localhost:5047` (see root `README.md`).
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. API requests go to `/api` and are proxied to the backend (see `vite.config.ts`).
-
-Copy `.env.example` to `.env` only if you need to override proxy or API base URL settings.
+Open `http://localhost:5173`. API traffic goes to `/api` and is proxied to the backend (`vite.config.ts`).
 
 ## Build
 
@@ -25,8 +20,10 @@ npm run build
 npm run preview
 ```
 
-`preview` also proxies `/api` to the local API.
+## Environment
+
+Copy `.env.example` only if you need non-default API proxy or base URL settings. **Do not** put Groq keys here—they belong on the server.
 
 ## AI analysis
 
-Use **Analyze** on a feedback row. The browser calls the API only; Groq credentials stay on the server (`Groq:ApiKey`). See the repository root `README.md` for configuration.
+Use **Analyze** on a feedback row. The UI calls `POST /api/feedback/{id}/analyze`; Groq credentials never leave the API process.
